@@ -74,23 +74,48 @@ namespace CloudDrip.Core {
 		private void Download() {
 			web.OpenRequest(Settings.url);
 
-			Deserializer deserializer = new Deserializer(web.received);
-			track = deserializer.track;
+			Deserialize();
 
-			CloudDripForm.ChangeArtwork(track.artwork_url);
+			ChangeArtwork(track.artwork_url);
 
-			web.OpenDownload(track, Settings.clientId, Settings.path);
-
-			// ApplyMetadata callback once download is complete
-			web.DownloadListener(ApplyMetadata);
+			web.OpenAsyncDownload(track.stream_url, getMP3Path(), ApplyMetadata);
 
 			web.CloseRequest();
 		}
 
 		/// <summary>
+		/// Push JSON data into SoundCloudTrack object
+		/// </summary>
+		private void Deserialize() {
+			Deserializer<SoundCloudTrack> deserializer = new Deserializer<SoundCloudTrack>(web.received);
+			track = deserializer.data;
+		}
+
+		/// <summary>
+		/// Changes artwork thumbnail on form
+		/// </summary>
+		/// <param name="url">URL to thumbnail</param>
+		private void ChangeArtwork(string url) {
+			CloudDripForm.ChangeArtwork(url);
+		}
+
+		/// <summary>
+		/// Get the full path to the mp3
+		/// </summary>
+		/// <returns>full path to mp3</returns>
+		private string getMP3Path() {
+			return Settings.path + "/" + track.title + ".mp3";
+		}
+
+		/// <summary>
 		/// Begin writing the track metadata to mp3 file
 		/// </summary>
-		public void ApplyMetadata() {
+		private void ApplyMetadata() {
+			string artCoverUrl = meta.GetArtCover(track);
+			track.artwork = web.DownloadDataAsBytes(artCoverUrl);
+
+			Console.WriteLine("applymetadata");
+
 			meta.Apply(track, Settings.path);
 		}
 	}

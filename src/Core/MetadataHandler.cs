@@ -1,5 +1,4 @@
-﻿using System;
-using TagLib;
+﻿using TagLib;
 using CloudDrip.SoundCloud;
 using CloudDrip.WinForm;
 
@@ -37,6 +36,19 @@ namespace CloudDrip.Core {
 			SetPicture();
 
 			Save();
+		}
+
+		/// <summary>
+		/// Corrects the URL to get the full size cover
+		/// </summary>
+		/// <param name="track"></param>
+		/// <returns>URL to full size artwork cover</returns>
+		public string GetArtCover(SoundCloudTrack track) {
+			int index = track.artwork_url.LastIndexOf('-');
+			
+			string strStart = track.artwork_url.Substring(0, index);
+
+			return strStart + "-t500x500.jpg";
 		}
 
 		/// <summary>

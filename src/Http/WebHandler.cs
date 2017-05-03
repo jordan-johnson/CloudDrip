@@ -1,24 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 using System.Net;
 using CloudDrip.WinForm;
-using CloudDrip.SoundCloud;
-using CloudDrip.Core;
 
 namespace CloudDrip.Http {
 	/// <summary>
 	/// Need to rewrite this a bit...
 	/// </summary>
 	public class WebHandler {
-		public WebResponse response {get; private set;}
-		public StreamReader reader {get; private set;}
-		public string received {get; private set;}
-		
+		private WebResponse response;
+		private StreamReader reader;
 		private WebClient client;
+
+		public string received {get; private set;}
 
 		/// <summary>
 		/// Open request to URL
@@ -46,44 +40,52 @@ namespace CloudDrip.Http {
 			response.Close();
 		}
 
-		public void OpenDownload(SoundCloudTrack track, string clientId, string path) {
-			client = new WebClient();
+		/// <summary>
+		/// Download file asynchronously
+		/// </summary>
+		/// <param name="url">URL</param>
+		/// <param name="path"></param>
+		/// <param name="callback"></param>
+		public void OpenAsyncDownload(string url, string path, Action callback) {
+			using(client = new WebClient()) {
+				client.DownloadFileAsync(new Uri(url), path);
+				DownloadListener(callback);
+			}
+		}
 
-			path = path + "/" + track.title + ".mp3";
-
-			// should move this
-			GetArtCover(track);
-
-			client.DownloadFileAsync(new Uri(track.stream_url + "?client_id=" + clientId), path);
+		/// <summary>
+		/// Returns byte array from WebClient's DownloadData method
+		/// </summary>
+		/// <param name="url">URL To file</param>
+		/// <returns></returns>
+		public byte[] DownloadDataAsBytes(string url) {
+			return client.DownloadData(new Uri(url));
 		}
 
 		/// <summary>
 		/// Listen for download progress. On complete, call method provided
 		/// </summary>
 		/// <param name="when_complete">Callback when download complete</param>
-		public void DownloadListener(Action when_complete) {
+		private void DownloadListener(Action when_complete) {
 			int progress = 0;
 			
 			client.DownloadProgressChanged += (s, e) => {
 				if(progress != e.ProgressPercentage) {
 					CloudDripForm.SetProgress("Downloading...", e.ProgressPercentage);
+
 					progress = e.ProgressPercentage;
 				}
 			};
 
 			client.DownloadFileCompleted += (s, e) => {
 				when_complete();
+
+				/**
+				 * may need to update this when i start working on 
+				 * downloading multiple files
+				 */
+				client.Dispose();
 			};
-		}
-		
-		private void GetArtCover(SoundCloudTrack track) {
-			int index = track.artwork_url.LastIndexOf('-');
-			
-			string strStart = track.artwork_url.Substring(0, index);
-
-			string final = strStart + "-t500x500.jpg";
-
-			track.artwork = client.DownloadData(new Uri(final));
 		}
 	}
 }

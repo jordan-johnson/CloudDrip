@@ -2,11 +2,11 @@
 using CloudDrip.SoundCloud;
 
 namespace CloudDrip.Core {
-	public class Deserializer {
-		public SoundCloudTrack track {get; private set;}
+	public class Deserializer<T> {
+		public T data {get; private set;}
 
 		public Deserializer(string message) {
-			track = new JavaScriptSerializer().Deserialize<SoundCloudTrack>(message);
+			data = new JavaScriptSerializer().Deserialize<T>(message);
 		}
 	}
 }
