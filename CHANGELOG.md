@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.1-alpha-2 (2017-05-02)
+
+### Minor changes
+
+* Added CloudDrip icon to window
+
+### Fixes
+
+* Finished code refactoring and commented more code
+
+	* Moved `GetArtCover()` from WebHandler to Initializer's `ApplyMetadata` method
+
+	* Moved a few local string setters into class properties (i.e. `stream_url` property in SoundCloudTrack now applies clientId)
+
+	* Updated `OpenDownload` method in WebHandler to be much cleaner
+
+	* Changed `DownloadListener` method to private and it's now called within `OpenDownload` method
+
+* Added `using(client = new WebClient)` since WebClient implements IDisposable
+
+* Deserializer now a template class instead of SoundCloudTrack class strict
+
+### To do
+
+* Import form for downloading multiple tracks via CSV file
+
+* Preferences for remembering save directory, auto-paste, etc.
+
 ## 1.1-alpha (2017-04-30)
 
 ### New features
