@@ -1,5 +1,6 @@
-﻿using TagLib;
-using CloudDrip.SoundCloud;
+﻿using System;
+using TagLib;
+using CloudDrip.Core.Serialize;
 using CloudDrip.WinForm;
 
 namespace CloudDrip.Core {
@@ -15,22 +16,16 @@ namespace CloudDrip.Core {
 		private SoundCloudTrack track;
 
 		/// <summary>
-		/// Path to mp3
-		/// </summary>
-		private string path;
-
-		/// <summary>
 		/// Apply metadata
 		/// </summary>
 		/// <param name="track">Track metadata</param>
 		/// <param name="path">Path to mp3</param>
 		public void Apply(SoundCloudTrack track, string path) {
 			this.track = track;
-			this.path = path;
 
-			CloudDripForm.SetProgress("Applying track metadata... please wait", 100);
+			Console.WriteLine("Applying mp3 metadata...");
 
-			mp3file = File.Create(this.path + "/" + track.title + ".mp3");
+			mp3file = File.Create(path + "/" + track.title + ".mp3");
 			
 			SetBasic();
 			SetPicture();
@@ -57,6 +52,7 @@ namespace CloudDrip.Core {
 		private void SetBasic() {
 			mp3file.Tag.Title = track.title;
 			mp3file.Tag.AlbumArtists = new string[]{ track.user.username };
+			mp3file.Tag.Performers = new string[]{ track.user.username };
 			mp3file.Tag.Genres = new string[] { track.genre };
 		}
 
@@ -77,7 +73,11 @@ namespace CloudDrip.Core {
 		/// Save changes to mp3
 		/// </summary>
 		private void Save() {
+			Console.WriteLine("Saved metadata.");
+			Console.WriteLine("Done.");
+
 			CloudDripForm.SetProgress("Ready.", 0);
+
 			mp3file.Save();
 		}
 	}

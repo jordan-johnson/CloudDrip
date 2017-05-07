@@ -31,7 +31,6 @@
 			this.urlLabel = new System.Windows.Forms.Label();
 			this.pasteButton = new System.Windows.Forms.Button();
 			this.downloadButton = new System.Windows.Forms.Button();
-			this.coverArt = new System.Windows.Forms.PictureBox();
 			this.footerVersion = new System.Windows.Forms.Label();
 			this.menuStrip1 = new System.Windows.Forms.MenuStrip();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,8 +43,10 @@
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.dlProgressLabel = new System.Windows.Forms.Label();
 			this.footerLink = new System.Windows.Forms.LinkLabel();
-			((System.ComponentModel.ISupportInitialize)(this.coverArt)).BeginInit();
+			this.coverArt = new System.Windows.Forms.PictureBox();
+			this.dlProgressInfoTextbox = new System.Windows.Forms.TextBox();
 			this.menuStrip1.SuspendLayout();
+			((System.ComponentModel.ISupportInitialize)(this.coverArt)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// pathField
@@ -110,19 +111,11 @@
 			this.downloadButton.UseVisualStyleBackColor = true;
 			this.downloadButton.Click += new System.EventHandler(this.downloadButtonClicked);
 			// 
-			// coverArt
-			// 
-			this.coverArt.Image = ((System.Drawing.Image)(resources.GetObject("coverArt.Image")));
-			this.coverArt.Location = new System.Drawing.Point(516, 44);
-			this.coverArt.Name = "coverArt";
-			this.coverArt.Size = new System.Drawing.Size(92, 88);
-			this.coverArt.TabIndex = 9;
-			this.coverArt.TabStop = false;
-			// 
 			// footerVersion
 			// 
+			this.footerVersion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.footerVersion.AutoSize = true;
-			this.footerVersion.Location = new System.Drawing.Point(9, 217);
+			this.footerVersion.Location = new System.Drawing.Point(9, 305);
 			this.footerVersion.Name = "footerVersion";
 			this.footerVersion.Size = new System.Drawing.Size(77, 13);
 			this.footerVersion.TabIndex = 10;
@@ -152,15 +145,18 @@
 			// 
 			// importToolStripMenuItem
 			// 
+			this.importToolStripMenuItem.Enabled = false;
 			this.importToolStripMenuItem.Name = "importToolStripMenuItem";
 			this.importToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.importToolStripMenuItem.Text = "Import...";
+			this.importToolStripMenuItem.Click += new System.EventHandler(this.importToolStripMenuItem_Click);
 			// 
 			// preferencesToolStripMenuItem
 			// 
 			this.preferencesToolStripMenuItem.Name = "preferencesToolStripMenuItem";
 			this.preferencesToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.preferencesToolStripMenuItem.Text = "Preferences...";
+			this.preferencesToolStripMenuItem.Click += new System.EventHandler(this.preferencesToolStripMenuItem_Click);
 			// 
 			// toolStripSeparator1
 			// 
@@ -172,6 +168,7 @@
 			this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
 			this.exitToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
 			this.exitToolStripMenuItem.Text = "Exit";
+			this.exitToolStripMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
 			// 
 			// aboutToolStripMenuItem
 			// 
@@ -186,6 +183,7 @@
 			this.aboutToolStripMenuItem1.Name = "aboutToolStripMenuItem1";
 			this.aboutToolStripMenuItem1.Size = new System.Drawing.Size(107, 22);
 			this.aboutToolStripMenuItem1.Text = "About";
+			this.aboutToolStripMenuItem1.Click += new System.EventHandler(this.aboutToolStripMenuItem1_Click);
 			// 
 			// progressBar
 			// 
@@ -205,7 +203,8 @@
 			// 
 			// footerLink
 			// 
-			this.footerLink.Location = new System.Drawing.Point(437, 212);
+			this.footerLink.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+			this.footerLink.Location = new System.Drawing.Point(437, 300);
 			this.footerLink.Name = "footerLink";
 			this.footerLink.Size = new System.Drawing.Size(171, 23);
 			this.footerLink.TabIndex = 14;
@@ -214,11 +213,32 @@
 			this.footerLink.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			this.footerLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.footerLink_LinkClicked);
 			// 
+			// coverArt
+			// 
+			this.coverArt.Image = ((System.Drawing.Image)(resources.GetObject("coverArt.Image")));
+			this.coverArt.Location = new System.Drawing.Point(516, 44);
+			this.coverArt.Name = "coverArt";
+			this.coverArt.Size = new System.Drawing.Size(92, 88);
+			this.coverArt.TabIndex = 9;
+			this.coverArt.TabStop = false;
+			// 
+			// dlProgressInfoTextbox
+			// 
+			this.dlProgressInfoTextbox.BackColor = System.Drawing.SystemColors.Control;
+			this.dlProgressInfoTextbox.Location = new System.Drawing.Point(12, 203);
+			this.dlProgressInfoTextbox.Multiline = true;
+			this.dlProgressInfoTextbox.Name = "dlProgressInfoTextbox";
+			this.dlProgressInfoTextbox.ReadOnly = true;
+			this.dlProgressInfoTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+			this.dlProgressInfoTextbox.Size = new System.Drawing.Size(596, 94);
+			this.dlProgressInfoTextbox.TabIndex = 15;
+			// 
 			// CloudDripForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(620, 239);
+			this.ClientSize = new System.Drawing.Size(620, 327);
+			this.Controls.Add(this.dlProgressInfoTextbox);
 			this.Controls.Add(this.footerLink);
 			this.Controls.Add(this.dlProgressLabel);
 			this.Controls.Add(this.progressBar);
@@ -236,9 +256,9 @@
 			this.MainMenuStrip = this.menuStrip1;
 			this.Name = "CloudDripForm";
 			this.Text = "CloudDrip";
-			((System.ComponentModel.ISupportInitialize)(this.coverArt)).EndInit();
 			this.menuStrip1.ResumeLayout(false);
 			this.menuStrip1.PerformLayout();
+			((System.ComponentModel.ISupportInitialize)(this.coverArt)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -246,7 +266,7 @@
 
 		#endregion
 
-		private System.Windows.Forms.TextBox pathField;
+		public System.Windows.Forms.TextBox pathField;
 		private System.Windows.Forms.Label pathLabel;
 		private System.Windows.Forms.Button pathButton;
 		private System.Windows.Forms.TextBox urlField;
@@ -266,6 +286,7 @@
 		private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
 		private System.Windows.Forms.LinkLabel footerLink;
 		private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem;
+		private System.Windows.Forms.TextBox dlProgressInfoTextbox;
 	}
 }
 

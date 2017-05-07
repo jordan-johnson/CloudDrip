@@ -1,10 +1,17 @@
-﻿using CloudDrip.Core;
-
-namespace CloudDrip.SoundCloud {
+﻿namespace CloudDrip.Core.Serialize {
+	/// <summary>
+	/// Extension of SoundCloudTrack
+	/// </summary>
 	public class User {
+		/// <summary>
+		/// Used in setting artist tag
+		/// </summary>
 		public string username {get;set;}
 	}
 
+	/// <summary>
+	/// SoundCloud track metadata object (for serialization)
+	/// </summary>
 	public class SoundCloudTrack {
 		public string id {get;set;}
 
@@ -17,7 +24,7 @@ namespace CloudDrip.SoundCloud {
 				return _full_stream_url;
 			}
 			set {
-				string clientId = Settings.clientId;
+				string clientId = DownloadVars.ClientId;
 
 				_full_stream_url = value + "?client_id=" + clientId;
 			}

@@ -2,17 +2,39 @@
 using System.IO;
 using System.Net;
 using CloudDrip.WinForm;
+using CloudDrip.Core.Serialize;
 
 namespace CloudDrip.Http {
 	/// <summary>
-	/// Need to rewrite this a bit...
+	/// Handles any web communication
 	/// </summary>
 	public class WebHandler {
-		private WebResponse response;
-		private StreamReader reader;
-		private WebClient client;
+		/// <summary>
+		/// Response from request
+		/// </summary>
+		private WebResponse _response;
 
-		public string received {get; private set;}
+		/// <summary>
+		/// Content reader
+		/// </summary>
+		private StreamReader _reader;
+
+		/// <summary>
+		/// WebClient for downloading
+		/// </summary>
+		private WebClient _client;
+
+		/// <summary>
+		/// Message returned from request
+		/// </summary>
+		public string Received {get; private set;}
+
+		/// <summary>
+		/// Determines if proxy will be  used (relies on preference)
+		/// </summary>
+		public bool UseProxy {get;set;}
+		public string ProxyAddress {get;set;}
+		public int ProxyPort {get;set;}
 
 		/// <summary>
 		/// Open request to URL
@@ -21,23 +43,75 @@ namespace CloudDrip.Http {
 		public void OpenRequest(string url) {
 			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
 
+			if(!checkRequest(request)) {
+				return;
+			}
+
+			connectProxy(request);
+
 			request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
 			request.Credentials = CredentialCache.DefaultCredentials;
 
-			response = request.GetResponse();
+			_response = request.GetResponse();
 
-			Stream dataStream = response.GetResponseStream();
-			reader = new StreamReader(dataStream);
+			Stream dataStream = _response.GetResponseStream();
+			_reader = new StreamReader(dataStream);
 
-			received = reader.ReadToEnd();
+			Received = _reader.ReadToEnd();
+		}
+
+		/// <summary>
+		/// Check if connection was established
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns></returns>
+		private bool checkRequest(HttpWebRequest request) {
+			if(request != null) {
+				Console.WriteLine("Connection established.");
+
+				return true;
+			} else {
+				Console.WriteLine("Connection could not be established. Stopping.");
+
+				return false;
+			}
+		}
+
+		/// <summary>
+		/// Use proxy if preference dictates
+		/// </summary>
+		/// <param name="request"></param>
+		private void connectProxy(HttpWebRequest request) {
+			if(UseProxy) {
+				Console.WriteLine("Using proxy for request, please wait... " + ProxyAddress + ":" + ProxyPort);
+
+				request.Proxy = new WebProxy(ProxyAddress, ProxyPort);
+			}
+		}
+
+		/// <summary>
+		/// Use proxy if preference dictates
+		/// </summary>
+		/// <param name="client"></param>
+		private void connectProxy(WebClient client) {
+			if(UseProxy) {
+				Console.WriteLine("Using proxy for download, please wait... " + ProxyAddress + ":" + ProxyPort);
+
+				client.Proxy = new WebProxy(ProxyAddress, ProxyPort);
+			}
 		}
 
 		/// <summary>
 		/// Close any open requests
 		/// </summary>
 		public void CloseRequest() {
-			reader.Close();
-			response.Close();
+			if(_reader != null) {
+				_reader.Close();
+			}
+
+			if(_response != null) {
+				_response.Close();
+			}
 		}
 
 		/// <summary>
@@ -47,9 +121,26 @@ namespace CloudDrip.Http {
 		/// <param name="path"></param>
 		/// <param name="callback"></param>
 		public void OpenAsyncDownload(string url, string path, Action callback) {
-			using(client = new WebClient()) {
-				client.DownloadFileAsync(new Uri(url), path);
+			using(_client = new WebClient()) {
+				connectProxy(_client);
+
+				Console.WriteLine("Downloading...");
+
+				_client.DownloadFileAsync(new Uri(url), path);
 				DownloadListener(callback);
+			}
+		}
+
+		/// <summary>
+		/// Check if proxy is requested via preferences then assigns address and port
+		/// </summary>
+		/// <param name="preferences">User preferences</param>
+		public void SetupProxy(Preferences preferences) {
+			UseProxy = preferences.Proxy;
+
+			if(UseProxy) {
+				ProxyAddress = preferences.ProxyIP;
+				ProxyPort = preferences.ProxyPort;
 			}
 		}
 
@@ -59,7 +150,7 @@ namespace CloudDrip.Http {
 		/// <param name="url">URL To file</param>
 		/// <returns></returns>
 		public byte[] DownloadDataAsBytes(string url) {
-			return client.DownloadData(new Uri(url));
+			return _client.DownloadData(new Uri(url));
 		}
 
 		/// <summary>
@@ -69,7 +160,7 @@ namespace CloudDrip.Http {
 		private void DownloadListener(Action when_complete) {
 			int progress = 0;
 			
-			client.DownloadProgressChanged += (s, e) => {
+			_client.DownloadProgressChanged += (s, e) => {
 				if(progress != e.ProgressPercentage) {
 					CloudDripForm.SetProgress("Downloading...", e.ProgressPercentage);
 
@@ -77,14 +168,16 @@ namespace CloudDrip.Http {
 				}
 			};
 
-			client.DownloadFileCompleted += (s, e) => {
+			_client.DownloadFileCompleted += (s, e) => {
+				Console.WriteLine("Download complete.");
+
 				when_complete();
 
 				/**
 				 * may need to update this when i start working on 
 				 * downloading multiple files
 				 */
-				client.Dispose();
+				_client.Dispose();
 			};
 		}
 	}

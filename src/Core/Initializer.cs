@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
+using System.Threading.Tasks;
 using CloudDrip.WinForm;
 using CloudDrip.Http;
-using CloudDrip.SoundCloud;
+using CloudDrip.Core.Serialize;
 
 namespace CloudDrip.Core {
 	/// <summary>
@@ -25,78 +27,68 @@ namespace CloudDrip.Core {
 		private SoundCloudTrack track;
 
 		/// <summary>
+		/// Serialization
+		/// </summary>
+		private Serialization serialization;
+
+		/// <summary>
+		/// Manage preferences
+		/// </summary>
+		public PreferenceHandler Preferences {get;set;}
+
+		/// <summary>
 		/// Constructor
 		/// </summary>
 		public Initializer() {
 			web = new WebHandler();
 			meta = new MetadataHandler();
+			serialization = new Serialization();
+			Preferences = new PreferenceHandler();
 		}
 
 		/// <summary>
-		/// Save path and url then begin download
+		/// Run some basic checks and set path, url, then download
 		/// </summary>
-		/// <param name="path">Directory to save track</param>
-		/// <param name="url">SoundCloud URL to track</param>
+		/// <param name="path"></param>
+		/// <param name="url"></param>
 		public void Begin(string path, string url) {
 			if(path == String.Empty || url == String.Empty) {
-				CloudDripForm.InterruptProgress("path or URL not provided");
+				Console.WriteLine("Path or URL not provided. Stopped.");
 
 				return;
 			}
 
-			SetPath(path);
+			if(!Directory.Exists(path)) {
+				Console.WriteLine("Directory does not exist. Stopped.");
 
-			// used in getting track metadata
-			UpdateURL(url);
+				return;
+			}
+
+			DownloadVars.Path = path;
+			DownloadVars.URL = url;
 
 			Download();
-		}
-
-		/// <summary>
-		/// Set the save directory
-		/// </summary>
-		/// <param name="path">Directory</param>
-		private void SetPath(string path) {
-			Settings.path = path;
-		}
-
-		/// <summary>
-		/// Converts the SoundCloud URL to retrieve json metadata
-		/// </summary>
-		/// <param name="url">SoundCloud URL to track</param>
-		private void UpdateURL(string url) {
-			Settings.url = "https://api.soundcloud.com/resolve.json?url=" + url + "&client_id=" + Settings.clientId;
 		}
 
 		/// <summary>
 		/// Download track
 		/// </summary>
 		private void Download() {
-			web.OpenRequest(Settings.url);
+			// checks if proxy is to be used
+			web.SetupProxy(Preferences.Data);
 
-			Deserialize();
+			web.OpenRequest(DownloadVars.URL);
 
-			ChangeArtwork(track.artwork_url);
+			// convert received message into SoundCloudTrack 
+			track = serialization.Deserialize<SoundCloudTrack>(web.Received);
 
+			// changes the thumbnail on main form
+			CloudDripForm.ChangeArtwork(track.artwork_url);
+
+			// url, save path, callback when download completes
 			web.OpenAsyncDownload(track.stream_url, getMP3Path(), ApplyMetadata);
 
 			web.CloseRequest();
-		}
-
-		/// <summary>
-		/// Push JSON data into SoundCloudTrack object
-		/// </summary>
-		private void Deserialize() {
-			Deserializer<SoundCloudTrack> deserializer = new Deserializer<SoundCloudTrack>(web.received);
-			track = deserializer.data;
-		}
-
-		/// <summary>
-		/// Changes artwork thumbnail on form
-		/// </summary>
-		/// <param name="url">URL to thumbnail</param>
-		private void ChangeArtwork(string url) {
-			CloudDripForm.ChangeArtwork(url);
 		}
 
 		/// <summary>
@@ -104,7 +96,7 @@ namespace CloudDrip.Core {
 		/// </summary>
 		/// <returns>full path to mp3</returns>
 		private string getMP3Path() {
-			return Settings.path + "/" + track.title + ".mp3";
+			return DownloadVars.Path + "/" + track.title + ".mp3";
 		}
 
 		/// <summary>
@@ -112,11 +104,10 @@ namespace CloudDrip.Core {
 		/// </summary>
 		private void ApplyMetadata() {
 			string artCoverUrl = meta.GetArtCover(track);
+
 			track.artwork = web.DownloadDataAsBytes(artCoverUrl);
 
-			Console.WriteLine("applymetadata");
-
-			meta.Apply(track, Settings.path);
+			meta.Apply(track, DownloadVars.Path);
 		}
 	}
 }
