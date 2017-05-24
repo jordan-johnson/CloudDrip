@@ -1,27 +1,16 @@
 ﻿using System;
 using System.Windows.Forms;
 using CloudDrip.Core;
+using CloudDrip.Helpers;
 
-namespace CloudDrip.WinForm {
+namespace CloudDrip.Forms {
 	/// <summary>
 	/// PreferencesForm gives the user options such as proxy, remember save path, auto-paste on startup, etc.
 	/// </summary>
 	public partial class PreferencesForm : Form {
 		private PreferenceHandler _ph;
-		private CloudDripForm _parent;
 
-		public PreferencesForm(CloudDripForm parent, PreferenceHandler handler) {
-			InitializeComponent();
-
-			StartPosition = FormStartPosition.CenterScreen;
-			FormBorderStyle = FormBorderStyle.FixedDialog;
-			MaximizeBox = false;
-
-			_parent = parent;
-			_ph = handler;
-
-			checkPreferences();
-		}
+		private FormHelper _helper;
 
 		/// <summary>
 		/// Used in remembering previous settings (it's saved in preferences.json)
@@ -53,7 +42,7 @@ namespace CloudDrip.WinForm {
 			 * the download info box by referencing
 			 * the parent form (CloudDripForm)
 			 */
-			_parent.DisplayDownloadInfo(_ph.Data.ShowDownloadLog);
+			_helper.Parent.DisplayDownloadInfo(_ph.Data.ShowDownloadLog);
 
 			_ph.Update();
 
@@ -77,6 +66,24 @@ namespace CloudDrip.WinForm {
 		private void proxyCheckbox_CheckedChanged(object sender, EventArgs e) {
 			proxyAddressField.Enabled = proxyCheckbox.Checked;
 			proxyPortField.Enabled = proxyCheckbox.Checked;
+		}
+
+		/// <summary>
+		/// GUI for preferences
+		/// </summary>
+		/// <param name="parent"></param>
+		/// <param name="handler"></param>
+		public PreferencesForm(CloudDripForm parent, PreferenceHandler handler) {
+			InitializeComponent();
+
+			_helper = new FormHelper(this);
+			_helper.Defaults();
+
+			_helper.Parent = parent;
+
+			_ph = handler;
+
+			checkPreferences();
 		}
 	}
 }

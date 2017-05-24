@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using CloudDrip.WinForm;
+using CloudDrip.Forms;
 
 namespace CloudDrip {
 	static class Program {

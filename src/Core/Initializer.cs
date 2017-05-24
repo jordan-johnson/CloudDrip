@@ -1,9 +1,8 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using CloudDrip.WinForm;
+using CloudDrip.Forms;
 using CloudDrip.Http;
-using CloudDrip.Core.Serialize;
+using CloudDrip.Models;
 
 namespace CloudDrip.Core {
 	/// <summary>
@@ -14,12 +13,12 @@ namespace CloudDrip.Core {
 		/// Handles web requests and pushes
 		/// data to data collection
 		/// </summary>
-		private WebHandler web;
+		private WebHandler web = new WebHandler();
 
 		/// <summary>
 		/// Used for writing track metadata
 		/// </summary>
-		private MetadataHandler meta;
+		private MetadataHandler meta = new MetadataHandler();
 
 		/// <summary>
 		/// Current track being downloaded
@@ -29,46 +28,7 @@ namespace CloudDrip.Core {
 		/// <summary>
 		/// Serialization
 		/// </summary>
-		private Serialization serialization;
-
-		/// <summary>
-		/// Manage preferences
-		/// </summary>
-		public PreferenceHandler Preferences {get;set;}
-
-		/// <summary>
-		/// Constructor
-		/// </summary>
-		public Initializer() {
-			web = new WebHandler();
-			meta = new MetadataHandler();
-			serialization = new Serialization();
-			Preferences = new PreferenceHandler();
-		}
-
-		/// <summary>
-		/// Run some basic checks and set path, url, then download
-		/// </summary>
-		/// <param name="path"></param>
-		/// <param name="url"></param>
-		public void Begin(string path, string url) {
-			if(path == String.Empty || url == String.Empty) {
-				Console.WriteLine("Path or URL not provided. Stopped.");
-
-				return;
-			}
-
-			if(!Directory.Exists(path)) {
-				Console.WriteLine("Directory does not exist. Stopped.");
-
-				return;
-			}
-
-			DownloadVars.Path = path;
-			DownloadVars.URL = url;
-
-			Download();
-		}
+		private Serialization serialization = new Serialization();
 
 		/// <summary>
 		/// Download track
@@ -108,6 +68,35 @@ namespace CloudDrip.Core {
 			track.artwork = web.DownloadDataAsBytes(artCoverUrl);
 
 			meta.Apply(track, DownloadVars.Path);
+		}
+
+		/// <summary>
+		/// Manage preferences
+		/// </summary>
+		public PreferenceHandler Preferences = new PreferenceHandler();
+
+		/// <summary>
+		/// Run some basic checks and set path, url, then download
+		/// </summary>
+		/// <param name="path"></param>
+		/// <param name="url"></param>
+		public void Start(string path, string url) {
+			if(path == String.Empty || url == String.Empty) {
+				Console.WriteLine("Path or URL not provided. Stopped.");
+
+				return;
+			}
+
+			if(!Directory.Exists(path)) {
+				Console.WriteLine("Directory does not exist. Stopped.");
+
+				return;
+			}
+
+			DownloadVars.Path = path;
+			DownloadVars.URL = url;
+
+			Download();
 		}
 	}
 }

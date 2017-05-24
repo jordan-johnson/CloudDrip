@@ -1,4 +1,4 @@
-﻿namespace CloudDrip.WinForm {
+﻿namespace CloudDrip.Forms {
 	partial class ImportForm {
 		/// <summary>
 		/// Required designer variable.

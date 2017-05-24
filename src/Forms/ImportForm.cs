@@ -1,22 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
+using CloudDrip.Helpers;
 
-namespace CloudDrip.WinForm {
+namespace CloudDrip.Forms {
 	/// <summary>
 	/// Import form is not finished. Async downloads became too much of a headache for 1.1
 	/// </summary>
-	public partial class ImportForm :Form {
-		private CloudDripForm _parent;
+	public partial class ImportForm : Form {
+		private FormHelper _helper;
 
 		public ImportForm(CloudDripForm parent) {
 			InitializeComponent();
 
-			StartPosition = FormStartPosition.CenterScreen;
-			FormBorderStyle = FormBorderStyle.FixedDialog;
-			MaximizeBox = false;
+			_helper = new FormHelper(this);
 
-			_parent = parent;
+			_helper.Defaults();
 		}
 
 		private void importBeginDownloadButton_Click(object sender, EventArgs e) {

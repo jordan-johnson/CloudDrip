@@ -1,8 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using CloudDrip.WinForm;
-using CloudDrip.Core.Serialize;
+using CloudDrip.Forms;
+using CloudDrip.Models;
 
 namespace CloudDrip.Http {
 	/// <summary>
@@ -23,42 +23,6 @@ namespace CloudDrip.Http {
 		/// WebClient for downloading
 		/// </summary>
 		private WebClient _client;
-
-		/// <summary>
-		/// Message returned from request
-		/// </summary>
-		public string Received {get; private set;}
-
-		/// <summary>
-		/// Determines if proxy will be  used (relies on preference)
-		/// </summary>
-		public bool UseProxy {get;set;}
-		public string ProxyAddress {get;set;}
-		public int ProxyPort {get;set;}
-
-		/// <summary>
-		/// Open request to URL
-		/// </summary>
-		/// <param name="url"></param>
-		public void OpenRequest(string url) {
-			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-
-			if(!checkRequest(request)) {
-				return;
-			}
-
-			connectProxy(request);
-
-			request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
-			request.Credentials = CredentialCache.DefaultCredentials;
-
-			_response = request.GetResponse();
-
-			Stream dataStream = _response.GetResponseStream();
-			_reader = new StreamReader(dataStream);
-
-			Received = _reader.ReadToEnd();
-		}
 
 		/// <summary>
 		/// Check if connection was established
@@ -99,6 +63,78 @@ namespace CloudDrip.Http {
 
 				client.Proxy = new WebProxy(ProxyAddress, ProxyPort);
 			}
+		}
+
+		/// <summary>
+		/// Listen for download progress. On complete, call method provided
+		/// </summary>
+		/// <param name="when_complete">Callback when download complete</param>
+		private void DownloadListener(Action when_complete) {
+			int progress = 0;
+			
+			_client.DownloadProgressChanged += (s, e) => {
+				if(progress != e.ProgressPercentage) {
+					CloudDripForm.SetProgress("Downloading...", e.ProgressPercentage);
+
+					progress = e.ProgressPercentage;
+				}
+			};
+
+			_client.DownloadFileCompleted += (s, e) => {
+				Console.WriteLine("Download complete.");
+
+				when_complete();
+
+				/**
+				 * may need to update this when i start working on 
+				 * downloading multiple files
+				 */
+				_client.Dispose();
+			};
+		}
+
+		/// <summary>
+		/// Message returned from request
+		/// </summary>
+		public string Received {get; private set;}
+
+		/// <summary>
+		/// Determines if proxy will be  used (relies on preference)
+		/// </summary>
+		public bool UseProxy {get;set;}
+
+		/// <summary>
+		/// Address
+		/// </summary>
+		public string ProxyAddress {get;set;}
+
+		/// <summary>
+		/// Port
+		/// </summary>
+		public int ProxyPort {get;set;}
+
+		/// <summary>
+		/// Open request to URL
+		/// </summary>
+		/// <param name="url"></param>
+		public void OpenRequest(string url) {
+			HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
+			if(!checkRequest(request)) {
+				return;
+			}
+
+			connectProxy(request);
+
+			request.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1; .NET CLR 1.1.4322; .NET CLR 2.0.50727)";
+			request.Credentials = CredentialCache.DefaultCredentials;
+
+			_response = request.GetResponse();
+
+			Stream dataStream = _response.GetResponseStream();
+			_reader = new StreamReader(dataStream);
+
+			Received = _reader.ReadToEnd();
 		}
 
 		/// <summary>
@@ -151,34 +187,6 @@ namespace CloudDrip.Http {
 		/// <returns></returns>
 		public byte[] DownloadDataAsBytes(string url) {
 			return _client.DownloadData(new Uri(url));
-		}
-
-		/// <summary>
-		/// Listen for download progress. On complete, call method provided
-		/// </summary>
-		/// <param name="when_complete">Callback when download complete</param>
-		private void DownloadListener(Action when_complete) {
-			int progress = 0;
-			
-			_client.DownloadProgressChanged += (s, e) => {
-				if(progress != e.ProgressPercentage) {
-					CloudDripForm.SetProgress("Downloading...", e.ProgressPercentage);
-
-					progress = e.ProgressPercentage;
-				}
-			};
-
-			_client.DownloadFileCompleted += (s, e) => {
-				Console.WriteLine("Download complete.");
-
-				when_complete();
-
-				/**
-				 * may need to update this when i start working on 
-				 * downloading multiple files
-				 */
-				_client.Dispose();
-			};
 		}
 	}
 }

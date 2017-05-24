@@ -1,4 +1,4 @@
-﻿namespace CloudDrip.WinForm {
+﻿namespace CloudDrip.Forms {
 	partial class PreferencesForm {
 		/// <summary>
 		/// Required designer variable.

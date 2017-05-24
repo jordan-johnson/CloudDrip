@@ -1,5 +1,47 @@
 # Changelog
 
+## 1.1.1 (2017-05-23)
+
+### Fixes
+
+* Code refactoring
+
+	* Renamed WinForms namespace to Forms
+
+	* Added Helpers namespace
+
+		* FormHelper added
+
+	* Added partial class file for CloudDripForm to handle events (CloudDripForm.Events.cs)
+
+	* Restructured classes
+
+		* private
+
+		* constructor
+
+		* public
+
+	* Added Models namespace and moved Preferences and SoundCloudTrack to it
+
+	* Added comments to SoundCloudTrack model
+
+	* User class in SoundCloudTrack file moved inside of SoundCloudTrack class
+
+	* Changed Begin method name to Start in Initializer class
+
+### To do
+
+* Next version (1.2)
+
+	* Setting to open directory to downloaded mp3
+
+	* Add checks to prevent crashing
+
+	* Add download queue for downloading multiple tracks
+
+	* Look into improving performance (slow downloads lag application)
+
 ## 1.1 (2017-05-07)
 
 ### New features

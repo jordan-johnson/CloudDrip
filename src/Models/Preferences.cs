@@ -1,4 +1,4 @@
-﻿namespace CloudDrip.Core.Serialize {
+﻿namespace CloudDrip.Models {
 	public class Preferences {
 		public bool SavePath {get;set;}
 		public string SavedPath {get;set;}

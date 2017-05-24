@@ -4,6 +4,11 @@
 	/// </summary>
 	public class DownloadVars {
 		/// <summary>
+		/// Full URL to SoundCloud track json doc
+		/// </summary>
+		private static string _url;
+
+		/// <summary>
 		/// Client Id that SoundCloud needs to download
 		/// </summary>
 		public static string ClientId = "bed20744714e9c5962c351efe15840ff";
@@ -12,8 +17,6 @@
 		/// Path to save directory
 		/// </summary>
 		public static string Path {get;set;}
-
-		private static string _url;
 
 		/// <summary>
 		/// Full URL to track metadata
