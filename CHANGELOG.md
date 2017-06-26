@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 (2017-06-26)
+
+### Fixes
+
+* Client Id updated
+
 ## 1.1.1 (2017-05-23)
 
 ### Fixes

@@ -11,7 +11,7 @@
 		/// <summary>
 		/// Client Id that SoundCloud needs to download
 		/// </summary>
-		public static string ClientId = "bed20744714e9c5962c351efe15840ff";
+		public static string ClientId = "a06b61f88c8297cc5abe6167a2d4c519";
 
 		/// <summary>
 		/// Path to save directory
